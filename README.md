@@ -94,7 +94,20 @@ chmod +x parameterx.py
 mv parameterx.py parameterx
 sudo mv parameterx /usr/local/bin/
 parameterx "http://example.com/page.php?id=1"
+```
 
+### ⚠️ Limitations
+
+Some websites (e.g. Medium, Cloudflare‑protected apps) block automated requests.
+If ParameterX cannot fetch a target URL, this is likely due to bot protection.
+
+For best results, test against:
+- Labs (OWASP Juice Shop, DVWA)
+- Internal applications
+- APIs
+- Self‑hosted test environments
+
+Don't worry, I am trying my best maybe i will fix this in next update of ParameterX :)
 
 
 
