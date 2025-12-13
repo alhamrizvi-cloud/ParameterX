@@ -76,6 +76,24 @@ source parameterx_venv/bin/activate
 pip install requests beautifulsoup4
 EXAMPLE:
 python3 parameterx.py "http://example.com/page.php?id=1"
+```
+
+## 🌍 Run ParameterX as a Global Command (Optional)
+
+You can install ParameterX as a **global Linux command**, allowing you to run it **without `python3`**, just like other security tools.
+
+### 1️⃣ Add a Shebang (Already Included)
+
+Ensure the first line of `parameterx.py` is:
+
+```python
+#!/usr/bin/env python3
+chmod +x parameterx.py
+
+mv parameterx.py parameterx
+sudo mv parameterx /usr/local/bin/
+parameterx "http://example.com/page.php?id=1"
+
 
 
 
