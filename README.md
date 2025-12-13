@@ -6,7 +6,58 @@
 
 ## 🛠 Installation
 
-ParameterX is written in **Python 3** and works best inside a **virtual environment**, especially on security distributions like **Parrot OS** or **Kali Linux**.
+ParameterX is a Python-based web security tool designed for penetration testers, especially at the junior level.
+Its primary purpose is discovering HTTP parameters in web applications and analyzing how removing or manipulating them changes the behavior of the application.
+
+## 🔍 What the Tool Does
+
+ParameterX works in five main steps:
+
+Baseline Request
+
+Sends a request to the target URL to get the normal response.
+
+This is used as a comparison point.
+
+Parameter Discovery
+
+Extracts parameters from:
+
+URL query strings (e.g., ?id=1&user_id=2)
+
+HTML form inputs (<input name="email">)
+
+A built-in list of common parameters (e.g., token, session_id, isAdmin)
+
+This helps find all potential points of interest in the app.
+
+Parameter Removal Test
+
+Removes each parameter one by one.
+
+Sends the modified request to the server.
+
+Compares the response to the baseline.
+
+Response Comparison
+
+Measures how similar the responses are (e.g., using a similarity score).
+
+If removing a parameter changes the response, it may indicate hidden logic or access control depending on that parameter.
+
+Risk Indication
+
+Assigns a risk level based on the similarity score:
+
+Low – no change
+
+Medium – minor differences
+
+High – significant behavioral change
+
+Outputs findings in a JSON report (parameterx_report.json) for documentation
+
+Think of it as a smart reconnaissance tool that helps you find parameters that might be vulnerable to IDOR, logic flaws, or access control issues.
 
 ### 1️⃣ Clone the Repository
 ```bash
