@@ -238,4 +238,4 @@ This tool is intended for security research and authorized testing only. Users a
 
 ---
 
-**Made with ❤️ by Ilham Rizvi**
+**Made with ❤️ by Alham Rizvi**
