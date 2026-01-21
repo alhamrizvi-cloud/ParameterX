@@ -1,5 +1,5 @@
 # ParameterX Makefile
-# Author: Ilham Rizvi
+# Author: alham Rizvi
 
 .PHONY: all build install clean test help run
 
