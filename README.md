@@ -215,7 +215,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 👨‍💻 Author
 
-**Ilham Rizvi** ([@alhamrizvi-cloud](https://github.com/alhamrizvi-cloud))
+**Alham Rizvi** ([@alhamrizvi-cloud](https://github.com/alhamrizvi-cloud))
 
 ## ⭐ Support
 
