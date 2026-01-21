@@ -1,0 +1,181 @@
+# ParameterX Makefile
+# Author: Ilham Rizvi
+
+.PHONY: all build install clean test help run
+
+# Variables
+BINARY_NAME=parameterx
+BINARY_PATH=/usr/local/bin
+GO_FILES=$(shell find . -name '*.go' -type f)
+VERSION=$(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
+LDFLAGS=-ldflags "-X main.Version=$(VERSION)"
+
+# Colors for output
+RED=\033[0;31m
+GREEN=\033[0;32m
+YELLOW=\033[1;33m
+BLUE=\033[0;34m
+NC=\033[0m # No Color
+
+# Default target
+all: build
+
+## help: Show this help message
+help:
+	@echo "$(BLUE)ParameterX - Makefile Commands$(NC)"
+	@echo ""
+	@echo "$(GREEN)Available targets:$(NC)"
+	@echo "  $(YELLOW)build$(NC)        - Build the binary"
+	@echo "  $(YELLOW)install$(NC)      - Install to $(BINARY_PATH)"
+	@echo "  $(YELLOW)uninstall$(NC)    - Remove from $(BINARY_PATH)"
+	@echo "  $(YELLOW)clean$(NC)        - Remove build artifacts"
+	@echo "  $(YELLOW)test$(NC)         - Run tests"
+	@echo "  $(YELLOW)run$(NC)          - Build and run (requires ARGS)"
+	@echo "  $(YELLOW)fmt$(NC)          - Format Go code"
+	@echo "  $(YELLOW)lint$(NC)         - Run linters"
+	@echo "  $(YELLOW)release$(NC)      - Build for multiple platforms"
+	@echo "  $(YELLOW)help$(NC)         - Show this help message"
+	@echo ""
+	@echo "$(GREEN)Examples:$(NC)"
+	@echo "  make build"
+	@echo "  make run ARGS=\"-d example.com -o output.txt\""
+	@echo "  make install"
+
+## build: Build the binary
+build:
+	@echo "$(BLUE)[*] Building $(BINARY_NAME)...$(NC)"
+	@go build $(LDFLAGS) -o $(BINARY_NAME) main.go
+	@echo "$(GREEN)[✓] Build complete: $(BINARY_NAME)$(NC)"
+
+## install: Install binary to system
+install: build
+	@echo "$(BLUE)[*] Installing $(BINARY_NAME) to $(BINARY_PATH)...$(NC)"
+	@if [ -w $(BINARY_PATH) ]; then \
+		mv $(BINARY_NAME) $(BINARY_PATH)/; \
+		chmod +x $(BINARY_PATH)/$(BINARY_NAME); \
+	else \
+		sudo mv $(BINARY_NAME) $(BINARY_PATH)/; \
+		sudo chmod +x $(BINARY_PATH)/$(BINARY_NAME); \
+	fi
+	@echo "$(GREEN)[✓] Installed successfully$(NC)"
+
+## uninstall: Remove binary from system
+uninstall:
+	@echo "$(BLUE)[*] Removing $(BINARY_NAME) from $(BINARY_PATH)...$(NC)"
+	@if [ -w $(BINARY_PATH) ]; then \
+		rm -f $(BINARY_PATH)/$(BINARY_NAME); \
+	else \
+		sudo rm -f $(BINARY_PATH)/$(BINARY_NAME); \
+	fi
+	@echo "$(GREEN)[✓] Uninstalled successfully$(NC)"
+
+## clean: Remove build artifacts
+clean:
+	@echo "$(BLUE)[*] Cleaning build artifacts...$(NC)"
+	@rm -f $(BINARY_NAME)
+	@rm -rf dist/
+	@rm -f *.test
+	@rm -f coverage.txt coverage.html
+	@echo "$(GREEN)[✓] Clean complete$(NC)"
+
+## test: Run tests
+test:
+	@echo "$(BLUE)[*] Running tests...$(NC)"
+	@go test -v -race -cover ./...
+	@echo "$(GREEN)[✓] Tests complete$(NC)"
+
+## run: Build and run with arguments
+run: build
+	@echo "$(BLUE)[*] Running $(BINARY_NAME)...$(NC)"
+	@./$(BINARY_NAME) $(ARGS)
+
+## fmt: Format Go code
+fmt:
+	@echo "$(BLUE)[*] Formatting code...$(NC)"
+	@go fmt ./...
+	@echo "$(GREEN)[✓] Format complete$(NC)"
+
+## lint: Run linters
+lint:
+	@echo "$(BLUE)[*] Running linters...$(NC)"
+	@if command -v golangci-lint > /dev/null; then \
+		golangci-lint run; \
+		echo "$(GREEN)[✓] Lint complete$(NC)"; \
+	else \
+		echo "$(YELLOW)[!] golangci-lint not installed$(NC)"; \
+		echo "$(YELLOW)[*] Install: curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin$(NC)"; \
+	fi
+
+## vet: Run go vet
+vet:
+	@echo "$(BLUE)[*] Running go vet...$(NC)"
+	@go vet ./...
+	@echo "$(GREEN)[✓] Vet complete$(NC)"
+
+## coverage: Generate coverage report
+coverage:
+	@echo "$(BLUE)[*] Generating coverage report...$(NC)"
+	@go test -race -coverprofile=coverage.txt -covermode=atomic ./...
+	@go tool cover -html=coverage.txt -o coverage.html
+	@echo "$(GREEN)[✓] Coverage report: coverage.html$(NC)"
+
+## mod: Download and tidy dependencies
+mod:
+	@echo "$(BLUE)[*] Downloading dependencies...$(NC)"
+	@go mod download
+	@go mod tidy
+	@echo "$(GREEN)[✓] Dependencies updated$(NC)"
+
+## release: Build for multiple platforms
+release: clean
+	@echo "$(BLUE)[*] Building release binaries...$(NC)"
+	@mkdir -p dist
+	
+	@echo "$(YELLOW)[*] Building for Linux AMD64...$(NC)"
+	@GOOS=linux GOARCH=amd64 go build $(LDFLAGS) -o dist/$(BINARY_NAME)-linux-amd64 main.go
+	
+	@echo "$(YELLOW)[*] Building for Linux ARM64...$(NC)"
+	@GOOS=linux GOARCH=arm64 go build $(LDFLAGS) -o dist/$(BINARY_NAME)-linux-arm64 main.go
+	
+	@echo "$(YELLOW)[*] Building for macOS AMD64...$(NC)"
+	@GOOS=darwin GOARCH=amd64 go build $(LDFLAGS) -o dist/$(BINARY_NAME)-darwin-amd64 main.go
+	
+	@echo "$(YELLOW)[*] Building for macOS ARM64...$(NC)"
+	@GOOS=darwin GOARCH=arm64 go build $(LDFLAGS) -o dist/$(BINARY_NAME)-darwin-arm64 main.go
+	
+	@echo "$(YELLOW)[*] Building for Windows AMD64...$(NC)"
+	@GOOS=windows GOARCH=amd64 go build $(LDFLAGS) -o dist/$(BINARY_NAME)-windows-amd64.exe main.go
+	
+	@echo "$(GREEN)[✓] Release builds complete in dist/$(NC)"
+	@ls -lh dist/
+
+## docker-build: Build Docker image
+docker-build:
+	@echo "$(BLUE)[*] Building Docker image...$(NC)"
+	@docker build -t $(BINARY_NAME):$(VERSION) .
+	@echo "$(GREEN)[✓] Docker image built$(NC)"
+
+## docker-run: Run in Docker
+docker-run:
+	@echo "$(BLUE)[*] Running in Docker...$(NC)"
+	@docker run --rm $(BINARY_NAME):$(VERSION) $(ARGS)
+
+## benchmark: Run benchmarks
+benchmark:
+	@echo "$(BLUE)[*] Running benchmarks...$(NC)"
+	@go test -bench=. -benchmem ./...
+
+## check: Run all checks (fmt, vet, lint, test)
+check: fmt vet lint test
+	@echo "$(GREEN)[✓] All checks passed$(NC)"
+
+## update: Update dependencies
+update:
+	@echo "$(BLUE)[*] Updating dependencies...$(NC)"
+	@go get -u ./...
+	@go mod tidy
+	@echo "$(GREEN)[✓] Dependencies updated$(NC)"
+
+## version: Show version
+version:
+	@echo "$(BLUE)Version: $(VERSION)$(NC)"

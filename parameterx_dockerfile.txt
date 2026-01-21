@@ -1,0 +1,56 @@
+# ParameterX Dockerfile
+# Multi-stage build for minimal image size
+
+# Build stage
+FROM golang:1.21-alpine AS builder
+
+# Install build dependencies
+RUN apk add --no-cache git make
+
+# Set working directory
+WORKDIR /build
+
+# Copy go mod files
+COPY go.mod go.sum* ./
+
+# Download dependencies (if go.sum exists)
+RUN if [ -f go.sum ]; then go mod download; fi
+
+# Copy source code
+COPY . .
+
+# Build binary
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags="-w -s" -o parameterx main.go
+
+# Runtime stage
+FROM alpine:latest
+
+# Install ca-certificates for HTTPS
+RUN apk --no-cache add ca-certificates
+
+# Create non-root user
+RUN addgroup -g 1000 parameterx && \
+    adduser -D -u 1000 -G parameterx parameterx
+
+# Set working directory
+WORKDIR /home/parameterx
+
+# Copy binary from builder
+COPY --from=builder /build/parameterx /usr/local/bin/parameterx
+
+# Make binary executable
+RUN chmod +x /usr/local/bin/parameterx
+
+# Switch to non-root user
+USER parameterx
+
+# Set entrypoint
+ENTRYPOINT ["parameterx"]
+
+# Default command (show help)
+CMD ["-h"]
+
+# Labels
+LABEL maintainer="Ilham Rizvi <https://github.com/alhamrizvi-cloud>"
+LABEL description="ParameterX - Passive URL Parameter Discovery Tool"
+LABEL version="1.0.0"
