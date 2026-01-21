@@ -1,114 +1,241 @@
 <img width="1024" height="768" alt="image" src="https://github.com/user-attachments/assets/d691e2aa-d0cc-470b-9ddd-3640bb1edb51" />
-# 🔎 ParameterX
 
-**Parameter Discovery & Behavioral Analysis Tool**  
-**Author:** Alham Rizvi
+ 
+# ParameterX
 
----
+```
+ ____                                _            __  __
+|  _ \ __ _ _ __ __ _ _ __ ___   ___| |_ ___ _ __\ \/ /
+| |_) / _' | '__/ _' | '_ ' _ \ / _ \ __/ _ \ '__|\  / 
+|  __/ (_| | | | (_| | | | | | |  __/ ||  __/ |   /  \ 
+|_|   \__,_|_|  \__,_|_| |_| |_|\___|\__\___|_|  /_/\_\
+                                                        
+        Passive URL Parameter Discovery Tool
+```
 
-## 📌 Description
+[![Go Version](https://img.shields.io/badge/Go-1.19+-00ADD8?style=flat&logo=go)](https://golang.org)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![GitHub Stars](https://img.shields.io/github/stars/alhamrizvi-cloud/ParameterX?style=social)](https://github.com/alhamrizvi-cloud/ParameterX/stargazers)
 
-ParameterX is a **Python-based web security tool** designed for **penetration testers**, especially at the **junior level**.
+**ParameterX** is a powerful passive reconnaissance tool that extracts historical URL parameters from public web archives without touching the live target. Perfect for bug bounty hunters and security researchers.
 
-Its primary purpose is to **discover HTTP parameters** in web applications and **analyze how removing those parameters affects application behavior**. This helps identify parameters that may be vulnerable to **IDOR, logic flaws, or access control issues**.
+## 🎯 Features
 
-Think of ParameterX as a **smart reconnaissance and analysis tool** that assists testers in deciding **what to test manually next**.
+- **🔍 100% Passive Reconnaissance** - No requests sent to target domains
+- **📚 Multiple Archive Sources** - Queries Wayback Machine, Archive.org, and Common Crawl
+- **⚡ Fast & Concurrent** - Multi-threaded processing with configurable workers
+- **🎯 Smart Filtering** - Automatic exclusion of static files (images, CSS, JS)
+- **🔄 Parameter Normalization** - Replaces values with custom placeholders (FUZZ)
+- **📊 Subdomain Support** - Process entire subdomain lists at once
+- **💾 Flexible Output** - Save results or print to stdout
 
----
+## 🚀 Installation
 
-## 🔍 What the Tool Does
+### From Source
 
-ParameterX works in **five main steps**:
-
-### 1️⃣ Baseline Request
-- Sends a request to the target URL
-- Captures the normal response
-- Uses this as a comparison reference
-
----
-
-### 2️⃣ Parameter Discovery
-Extracts parameters from:
-- URL query strings (e.g. `?id=1&user_id=2`)
-- HTML form inputs
-- A built‑in list of common parameters  
-  (e.g. `token`, `session_id`, `isAdmin`)
-
-This helps identify **all potential points of user-controlled input**.
-
----
-
-### 3️⃣ Parameter Removal Test
-- Removes each discovered parameter one by one
-- Sends a modified request to the server
-- Observes how the application responds
-
----
-
-### 4️⃣ Response Comparison
-- Compares the modified response with the baseline
-- Calculates a similarity score
-- Detects behavioral differences caused by parameter removal
-
----
-
-### 5️⃣ Risk Indication & Reporting
-- Assigns a **risk level** based on response difference:
-  - **Low** – No meaningful change
-  - **Medium** – Minor behavior change
-  - **High** – Significant behavior change
-- Outputs results to a JSON file:  
-  `parameterx_report.json`
-
-⚠️ Risk levels indicate **parameters worth manual testing**, not confirmed vulnerabilities.
-
----
-
-## 🛠 Installation
-
-ParameterX is written in **Python 3** and works best inside a **virtual environment**, especially on security-focused Linux distributions like **Parrot OS** or **Kali Linux**.
-
-### 1️⃣ Clone the Repository
 ```bash
-git clone https://github.com/alhamrizvi-cloud/ParameterX
+git clone https://github.com/alhamrizvi-cloud/ParameterX.git
 cd ParameterX
-python3 -m venv parameterx_venv
-source parameterx_venv/bin/activate
-pip install requests beautifulsoup4
-EXAMPLE:
-python3 parameterx.py "http://example.com/page.php?id=1"
-```
-
-## 🌍 Run ParameterX as a Global Command (Optional)
-
-You can install ParameterX as a **global Linux command**, allowing you to run it **without `python3`**, just like other security tools.
-
-### 1️⃣ Add a Shebang (Already Included)
-
-Ensure the first line of `parameterx.py` is:
-
-```python
-#!/usr/bin/env python3
-chmod +x parameterx.py
-
-mv parameterx.py parameterx
+go build -o parameterx main.go
 sudo mv parameterx /usr/local/bin/
-parameterx "http://example.com/page.php?id=1"
 ```
 
-### ⚠️ Limitations
+### Using Go Install
 
-Some websites (e.g. Medium, Cloudflare‑protected apps) block automated requests.
-If ParameterX cannot fetch a target URL, this is likely due to bot protection.
+```bash
+go install github.com/alhamrizvi-cloud/ParameterX@latest
+```
 
-For best results, test against:
-- Labs (OWASP Juice Shop, DVWA)
-- Internal applications
-- APIs
-- Self‑hosted test environments
+## 📖 Usage
 
-Don't worry, I am trying my best maybe i will fix this in next update of ParameterX :)
+### Basic Usage
 
+```bash
+# Single domain
+parameterx -d example.com -o output.txt
 
+# Multiple domains from file
+parameterx -l domains.txt -o output.txt
 
+# Process subdomains
+parameterx -s subdomains.txt -o params.txt
+```
 
+### Advanced Options
+
+```bash
+# Increase workers for faster processing
+parameterx -d example.com -w 20 -o output.txt
+
+# Verbose mode
+parameterx -d example.com -v -o output.txt
+
+# Custom placeholder for fuzzing
+parameterx -d example.com -placeholder PAYLOAD -o fuzz.txt
+
+# Silent mode (no banner)
+parameterx -d example.com -silent -o output.txt
+
+# Custom file exclusions
+parameterx -d example.com -exclude "jpg,png,pdf,zip" -o output.txt
+```
+
+## 🔧 Command Line Options
+
+```
+  -d string
+        Target domain (e.g., example.com)
+  -l string
+        File containing list of domains
+  -s string
+        File containing list of subdomains
+  -o string
+        Output file path
+  -w int
+        Number of concurrent workers (default: 10)
+  -placeholder string
+        Placeholder for parameter values (default: "FUZZ")
+  -exclude string
+        Comma-separated extensions to exclude (default: "jpg,jpeg,png,gif,css,js,svg,woff,woff2,ttf,eot,ico")
+  -v    Verbose output
+  -silent
+        Silent mode (no banner)
+```
+
+## 📊 Data Sources
+
+ParameterX queries the following passive sources:
+
+| Source | Description | Coverage |
+|--------|-------------|----------|
+| **Wayback Machine** | Internet Archive CDX API | Historical snapshots |
+| **Archive.org** | Alternative text format API | Extended coverage |
+| **Common Crawl** | Large-scale web crawl data | Multiple indexes |
+
+## 🎯 Bug Bounty Workflow
+
+```bash
+# Step 1: Subdomain enumeration
+subfinder -d target.com -o subdomains.txt
+
+# Step 2: Parameter discovery
+parameterx -s subdomains.txt -o params.txt
+
+# Step 3: Filter for specific vulnerabilities
+cat params.txt | gf xss > xss_params.txt
+cat params.txt | gf sqli > sqli_params.txt
+cat params.txt | gf redirect > redirect_params.txt
+
+# Step 4: Fuzz with ffuf
+ffuf -u FUZZ -w xss_params.txt -mc 200
+
+# Step 5: Manual validation with Burp Suite
+```
+
+## 🔍 Common Vulnerabilities Found
+
+| Vulnerability | Parameter Examples | Why ParameterX Helps |
+|---------------|-------------------|---------------------|
+| **XSS** | `q`, `search`, `query` | Finds old reflected parameters |
+| **Open Redirect** | `url`, `redirect`, `next` | Discovers redirect endpoints |
+| **IDOR** | `id`, `user_id`, `account` | Reveals API endpoints |
+| **SSRF** | `callback`, `webhook`, `url` | Identifies callback parameters |
+| **Debug Leaks** | `debug`, `test`, `dev` | Exposes debug endpoints |
+
+## 📁 Example Output
+
+```
+https://example.com/search?q=FUZZ
+https://api.example.com/user?id=FUZZ
+https://example.com/redirect?url=FUZZ
+https://admin.example.com/export?debug=FUZZ
+https://example.com/callback?webhook=FUZZ
+```
+
+## 🛠️ Integration with Other Tools
+
+### With httpx
+```bash
+parameterx -s subs.txt -o params.txt
+cat params.txt | httpx -mc 200 -o live.txt
+```
+
+### With nuclei
+```bash
+parameterx -d target.com -o params.txt
+nuclei -l params.txt -t xss/
+```
+
+### With meg
+```bash
+parameterx -s subs.txt -o params.txt
+meg --verbose paths.txt params.txt output/
+```
+
+## 📝 Input File Formats
+
+### domains.txt
+```
+example.com
+target.com
+test.com
+```
+
+### subdomains.txt
+```
+api.example.com
+admin.example.com
+dev.example.com
+https://mail.example.com
+http://blog.example.com/
+```
+
+## 🎓 How It Works
+
+1. **📥 Input Processing** - Reads domain/subdomain lists
+2. **🌐 Archive Querying** - Sends requests to Wayback, Archive.org, Common Crawl
+3. **📊 URL Collection** - Gathers historical URLs with parameters
+4. **🔎 Parameter Extraction** - Parses query strings and extracts parameter names
+5. **🔄 Normalization** - Replaces values with placeholders (FUZZ)
+6. **📤 Output Generation** - Saves deduplicated results
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📜 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 👨‍💻 Author
+
+**Ilham Rizvi** ([@alhamrizvi-cloud](https://github.com/alhamrizvi-cloud))
+
+## ⭐ Support
+
+If you found this tool helpful, please consider giving it a star ⭐
+
+## 🙏 Acknowledgments
+
+- Internet Archive for Wayback Machine API
+- Common Crawl for web crawl data
+- The bug bounty community for feedback and support
+
+## 📞 Contact
+
+- GitHub: [@alhamrizvi-cloud](https://github.com/alhamrizvi-cloud)
+- Tool: [ParameterX](https://github.com/alhamrizvi-cloud/ParameterX)
+
+## ⚠️ Disclaimer
+
+This tool is intended for security research and authorized testing only. Users are responsible for complying with applicable laws and regulations. The author assumes no liability for misuse.
+
+---
+
+**Made with ❤️ by Ilham Rizvi**
