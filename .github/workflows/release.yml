@@ -1,0 +1,99 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build and Release
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+
+      - name: Get version
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Build binaries
+        run: |
+          mkdir -p dist
+          
+          # Linux AMD64
+          GOOS=linux GOARCH=amd64 go build -ldflags="-s -w -X main.Version=${{ steps.version.outputs.VERSION }}" -o dist/parameterx-linux-amd64 main.go
+          
+          # Linux ARM64
+          GOOS=linux GOARCH=arm64 go build -ldflags="-s -w -X main.Version=${{ steps.version.outputs.VERSION }}" -o dist/parameterx-linux-arm64 main.go
+          
+          # macOS AMD64
+          GOOS=darwin GOARCH=amd64 go build -ldflags="-s -w -X main.Version=${{ steps.version.outputs.VERSION }}" -o dist/parameterx-darwin-amd64 main.go
+          
+          # macOS ARM64 (Apple Silicon)
+          GOOS=darwin GOARCH=arm64 go build -ldflags="-s -w -X main.Version=${{ steps.version.outputs.VERSION }}" -o dist/parameterx-darwin-arm64 main.go
+          
+          # Windows AMD64
+          GOOS=windows GOARCH=amd64 go build -ldflags="-s -w -X main.Version=${{ steps.version.outputs.VERSION }}" -o dist/parameterx-windows-amd64.exe main.go
+
+      - name: Create checksums
+        run: |
+          cd dist
+          sha256sum * > checksums.txt
+          cat checksums.txt
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            dist/parameterx-linux-amd64
+            dist/parameterx-linux-arm64
+            dist/parameterx-darwin-amd64
+            dist/parameterx-darwin-arm64
+            dist/parameterx-windows-amd64.exe
+            dist/checksums.txt
+          body: |
+            ## ParameterX ${{ steps.version.outputs.VERSION }}
+            
+            ### Installation
+            
+            **Linux (AMD64):**
+            ```bash
+            wget https://github.com/alhamrizvi-cloud/ParameterX/releases/download/${{ steps.version.outputs.VERSION }}/parameterx-linux-amd64
+            chmod +x parameterx-linux-amd64
+            sudo mv parameterx-linux-amd64 /usr/local/bin/parameterx
+            ```
+            
+            **macOS (Apple Silicon):**
+            ```bash
+            wget https://github.com/alhamrizvi-cloud/ParameterX/releases/download/${{ steps.version.outputs.VERSION }}/parameterx-darwin-arm64
+            chmod +x parameterx-darwin-arm64
+            sudo mv parameterx-darwin-arm64 /usr/local/bin/parameterx
+            ```
+            
+            **Windows:**
+            Download `parameterx-windows-amd64.exe` and add to PATH
+            
+            ### Verify Installation
+            ```bash
+            parameterx -h
+            ```
+            
+            ### What's Changed
+            See [CHANGELOG.md](https://github.com/alhamrizvi-cloud/ParameterX/blob/main/CHANGELOG.md)
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
