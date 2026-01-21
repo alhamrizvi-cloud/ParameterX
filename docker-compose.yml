@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  parameterx:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: parameterx:latest
+    container_name: parameterx
+    
+    # Mount volumes for input/output
+    volumes:
+      - ./input:/home/parameterx/input:ro
+      - ./output:/home/parameterx/output
+    
+    # Override command with your arguments
+    command: ["-d", "example.com", "-o", "/home/parameterx/output/params.txt"]
+    
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 1G
+        reservations:
+          cpus: '1'
+          memory: 512M
+    
+    # Restart policy
+    restart: unless-stopped
+    
+    # Network mode
+    network_mode: bridge
+    
+    # Environment variables (optional)
+    environment:
+      - TZ=UTC
+    
+    # Labels
+    labels:
+      com.parameterx.description: "ParameterX - Passive URL Parameter Discovery"
+      com.parameterx.version: "1.0.0"
+
+# Example usage:
+# 1. Build: docker-compose build
+# 2. Run with domain: docker-compose run --rm parameterx -d example.com -o /home/parameterx/output/results.txt
+# 3. Run with domain list: docker-compose run --rm parameterx -l /home/parameterx/input/domains.txt -o /home/parameterx/output/results.txt
+# 4. Run with subdomains: docker-compose run --rm parameterx -s /home/parameterx/input/subdomains.txt -o /home/parameterx/output/results.txt
