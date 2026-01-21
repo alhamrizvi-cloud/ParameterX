@@ -1,14 +1,16 @@
-<img width="1024" height="768" alt="image" src="https://github.com/user-attachments/assets/d691e2aa-d0cc-470b-9ddd-3640bb1edb51" />
+<img width="751" height="359" alt="image" src="https://github.com/user-attachments/assets/834293f9-fa38-44b1-993c-35a581ff5fa8" />
+
 
  
 # ParameterX
 
 ```
- ____                                _            __  __
-|  _ \ __ _ _ __ __ _ _ __ ___   ___| |_ ___ _ __\ \/ /
-| |_) / _' | '__/ _' | '_ ' _ \ / _ \ __/ _ \ '__|\  / 
-|  __/ (_| | | | (_| | | | | | |  __/ ||  __/ |   /  \ 
-|_|   \__,_|_|  \__,_|_| |_| |_|\___|\__\___|_|  /_/\_\
+
+▄▄▄▄  ▗▞▀▜▌ ▄▄▄ ▗▞▀▜▌▄▄▄▄  ▗▞▀▚▖   ■  ▗▞▀▚▖ ▄▄▄ ▄   ▄ 
+█   █ ▝▚▄▟▌█    ▝▚▄▟▌█ █ █ ▐▛▀▀▘▗▄▟▙▄▖▐▛▀▀▘█     ▀▄▀  
+█▄▄▄▀      █         █   █ ▝▚▄▄▖  ▐▌  ▝▚▄▄▖█    ▄▀ ▀▄ 
+█                                 ▐▌                  
+▀                                 ▐▌                                                            
                                                         
         Passive URL Parameter Discovery Tool
 ```
